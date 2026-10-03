@@ -23,6 +23,8 @@
     button[disabled] { opacity: .55; cursor: default; }
     .check { display: flex; align-items: center; gap: 8px; color: #6d6577; font-size: 13px; }
     #status { margin-top: 18px; padding: 14px 16px; border-radius: 16px; background: #f6f2fb; color: #4c4358; font-size: 13px; white-space: pre-wrap; }
+    #status.error { background: #ffe9e7; color: #b3261e; }
+    #status.ok { background: #e9f7ee; color: #1e6b3a; }
     #result { display: none; margin-top: 20px; padding: 18px; border-radius: 18px; background: linear-gradient(135deg, #fff6dc, #f7e6b8); }
     #result h2 { margin: 0 0 4px; font: 900 22px/1.25 "Songti SC", serif; }
     #result img { width: 100%; max-width: 320px; border-radius: 16px; display: block; margin: 12px 0; }
@@ -75,7 +77,7 @@
       <label class="check"><input id="planOnly" type="checkbox"> 快速模式（只出剧情，不出图）</label>
     </div>
 
-    <div id="status">等待输入…</div>
+    <div id="status">等待输入… · 构建 v2026.10.03c</div>
 
     <section id="result">
       <h2 id="resultTitle"></h2>
@@ -83,6 +85,7 @@
       <p id="resultMeta"></p>
       <a id="resultPlay" href="#" target="_blank">▶ 立即试玩</a>
     </section>
+    <p class="hint" id="buildTag">build v2026.10.03c · 有本地 config.json 时页面无需填写</p>
   </main>
   <script>
     const $ = (id) => document.getElementById(id);
@@ -118,21 +121,42 @@
     }
     loadConfig();
 
-    let timer = null;
+    let stopTicker = false;
+    function setStatus(text, kind) {
+      const box = $("status");
+      box.classList.toggle("error", kind === "error");
+      box.classList.toggle("ok", kind === "ok");
+      box.textContent = text;
+    }
+    async function tickProgress(started) {
+      if (stopTicker) return;
+      const seconds = Math.round((Date.now() - started) / 1000);
+      let tail = "";
+      try {
+        const response = await fetch("/api/progress");
+        const data = await response.json();
+        const lines = (data.lines || []).slice(-14).map(line => "  " + line.trim().slice(0, 110));
+        if (lines.length) tail = "\n" + lines.join("\n");
+      } catch (error) { /* keep the timer text */ }
+      if (stopTicker) return;
+      $("status").classList.remove("error");
+      $("status").classList.remove("ok");
+      $("status").textContent = `生成中… 已用时 ${seconds} 秒\n（剧情约 1 分钟；带配图的完整生成一般几分钟）${tail}`;
+      setTimeout(() => tickProgress(started), 1200);
+    }
     $("go").addEventListener("click", async () => {
       const sentence = $("sentence").value.trim();
       if (!sentence) return;
       if (!$("apiKey").value.trim() && !configInfo.llm?.hasKey) {
         $("apiBox").open = true;
-        $("status").textContent = "还没有 API Key：把 config.example.json 复制成 config.json 填好，或在上面输入框里填一个。";
+        setStatus("还没有 API Key：把 config.example.json 复制成 config.json 填好，或在上面输入框里填一个。", "error");
         return;
       }
       $("go").disabled = true;
       $("result").style.display = "none";
+      stopTicker = false;
       const started = Date.now();
-      const tick = () => { $("status").textContent = `生成中… 已用时 ${Math.round((Date.now() - started) / 1000)} 秒\n（剧情约 1 分钟；带配图的完整生成一般几分钟）`; };
-      tick();
-      timer = setInterval(tick, 1000);
+      tickProgress(started);
       try {
         const response = await fetch("/api/generate", {
           method: "POST",
@@ -152,14 +176,14 @@
         });
         const data = await response.json();
         if (!response.ok || data.error) {
-          $("status").textContent = `失败：${data.error || response.status}\n\n${(data.log || "").slice(-1200)}`;
+          setStatus(`失败：${data.error || response.status}\n\n${(data.log || "").slice(-1500)}`, "error");
           return;
         }
         if (data.planOnly) {
-          $("status").textContent = `策划完成（快速模式，未出图）：${data.seconds} 秒 · AI 调用 ${data.calls} 次\n标题：${data.title}\n工作目录：${data.workDir}\n\n${(data.log || "").slice(-800)}`;
+          setStatus(`策划完成（快速模式，未出图）：${data.seconds} 秒 · AI 调用 ${data.calls} 次\n标题：${data.title}\n工作目录：${data.workDir}\n\n${(data.log || "").slice(-800)}`, "ok");
           return;
         }
-        $("status").textContent = `完成：${data.seconds} 秒 · AI 调用 ${data.calls} 次\n世界 id：${data.worldId}\n工作目录：${data.workDir}\n\n${(data.log || "").slice(-800)}`;
+        setStatus(`完成：${data.seconds} 秒 · AI 调用 ${data.calls} 次\n世界 id：${data.worldId}\n工作目录：${data.workDir}\n\n${(data.log || "").slice(-800)}`, "ok");
         $("resultTitle").textContent = data.title;
         const cover = $("resultCover");
         cover.style.display = "";
@@ -169,9 +193,9 @@
         $("resultPlay").href = data.playUrl;
         $("result").style.display = "block";
       } catch (error) {
-        $("status").textContent = `失败：${error}`;
+        setStatus(`失败：${error}`, "error");
       } finally {
-        clearInterval(timer);
+        stopTicker = true;
         $("go").disabled = false;
       }
     });

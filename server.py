@@ -33,6 +33,9 @@ MAX_BODY_BYTES = 64 * 1024
 
 lock = threading.Lock()
 busy = False
+progress_lock = threading.Lock()
+progress = {"running": False, "started": 0.0, "lines": []}
+MAX_LINES = 400
 
 API_ENV = (
     ("base", "GLIMMERS_LLM_BASE"),
@@ -71,6 +74,26 @@ def config_digest() -> dict:
     }
 
 
+def reset_progress() -> None:
+    with progress_lock:
+        progress["running"] = True
+        progress["started"] = time.time()
+        progress["lines"] = []
+
+
+def append_log(line: str) -> None:
+    with progress_lock:
+        progress["lines"].append(line.rstrip("\n"))
+        if len(progress["lines"]) > MAX_LINES:
+            del progress["lines"][:-MAX_LINES]
+
+
+def read_worker(proc: subprocess.Popen) -> None:
+    for line in proc.stdout or []:
+        append_log(line)
+    proc.wait()
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -86,10 +109,20 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def end_headers(self):
+        # Local tool: never let the browser keep a stale page / stale JS.
+        self.send_header("Cache-Control", "no-store, max-age=0")
+        super().end_headers()
+
     def do_GET(self):
         path = self.path.split("?", 1)[0]
         if path == "/api/config":
             self.send_json(config_digest())
+            return
+        if path == "/api/progress":
+            with progress_lock:
+                seconds = round(time.time() - progress["started"], 1) if progress["running"] else 0
+                self.send_json({"running": progress["running"], "seconds": seconds, "lines": list(progress["lines"][-60:])})
             return
         if path in ("/config.json", "/config.local.json") or path.endswith("/config.json"):
             # The key file is local-only: never expose it through the web page.
@@ -141,7 +174,7 @@ class Handler(SimpleHTTPRequestHandler):
         env["GLIMMERS_PLAY_BASE"] = f"http://{HOST}:{PORT}"
 
         with lock:
-            if busy:
+            if busy or progress["running"]:
                 self.send_json({"error": "已有任务在生成中，请稍后再试"}, 429)
                 return
             busy = True
@@ -153,8 +186,20 @@ class Handler(SimpleHTTPRequestHandler):
             if workers > 0:
                 command += ["--workers", str(workers)]
             started = time.time()
-            result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=3600, env=env)
-            log = (result.stdout or "") + (result.stderr or "")
+            reset_progress()
+            env["PYTHONUNBUFFERED"] = "1"
+            command.insert(1, "-u")
+            proc = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1, env=env)
+            threading.Thread(target=read_worker, args=(proc,), daemon=True).start()
+            try:
+                proc.wait(timeout=3600)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait()
+                self.send_json({"error": "超时（1 小时）"}, 504)
+                return
+            with progress_lock:
+                log = "\n".join(progress["lines"]) + "\n"
             elapsed = round(time.time() - started, 1)
             match = re.search(r"^RESULT (\{.*\})$", log, flags=re.M)
             if not match:
@@ -167,9 +212,9 @@ class Handler(SimpleHTTPRequestHandler):
             payload["seconds"] = elapsed
             payload["log"] = log[-4000:]
             self.send_json(payload)
-        except subprocess.TimeoutExpired:
-            self.send_json({"error": "超时（1 小时）"}, 504)
         finally:
+            with progress_lock:
+                progress["running"] = False
             with lock:
                 busy = False
 
