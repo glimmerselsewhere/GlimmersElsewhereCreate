@@ -1,0 +1,18 @@
+{
+  "platformTitle": "Glimmers of Elsewhere",
+  "catalogNote": "Every world remembers what you chose.",
+  "soundToggle": "Toggle sound",
+  "backCatalog": "← Worlds",
+  "levelSelectTitle": "Choose a chapter",
+  "continueButton": "Keep watching",
+  "finalContinueButton": "See how it ends",
+  "replayButton": "Play again",
+  "introButton": "Open your cat eyes",
+  "catalog": {
+    "eyebrow": "GLIMMERS OF ELSEWHERE · WORLD CATALOGUE",
+    "headline": "Every little world has a game of its own.",
+    "description": "Cats guessing scenes, a cultivation cat, an isekai kitchen and a restaurant you order by ear. Pick a world and step in."
+  },
+  "keepsakeGet": "Get it on jujubit",
+  "keepsakeGetHint": "3D print · made real"
+}

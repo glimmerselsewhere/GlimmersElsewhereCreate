@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5eee1">
+  <title>异境拾光 · Glimmers of Elsewhere</title>
+  <link rel="stylesheet" href="app/style.css?v=22">
+</head>
+<body>
+  <main id="app" class="app-shell" aria-live="polite">
+    <section id="languageView" class="language-view" hidden>
+      <div class="language-orb" aria-hidden="true"><i></i><i></i><b>✦</b></div>
+      <p class="eyebrow">GLIMMERS OF ELSEWHERE</p>
+      <h2>异境拾光</h2>
+      <p class="language-subtitle">Choose your language · 选择语言</p>
+      <div class="language-buttons">
+        <button type="button" data-language-select="en">
+          <strong>English</strong>
+          <small>Enter in English</small>
+        </button>
+        <button type="button" data-language-select="zh">
+          <strong>中文</strong>
+          <small>进入中文世界</small>
+        </button>
+      </div>
+      <div id="languageLoading" class="language-loading" hidden>
+        <i aria-hidden="true"></i>
+        <span>Loading · 载入中</span>
+      </div>
+    </section>
+
+    <section id="catalogView" class="catalog-view">
+      <header class="brand-header">
+        <div class="brand-mark" aria-hidden="true"><i></i><i></i><b>✦</b></div>
+        <div><p>GLIMMERS OF ELSEWHERE</p><h1 id="platformTitle">异境拾光</h1></div>
+        <div class="header-actions">
+          <button id="langToggle" class="icon-button lang-button" type="button" aria-label="Switch language">EN</button>
+          <button id="catalogSound" class="icon-button" type="button" aria-label="切换声音">♫</button>
+        </div>
+      </header>
+
+      <section class="catalog-hero">
+        <p id="catalogEyebrow" class="eyebrow">异境拾光 · 世界目录</p>
+        <h2 id="catalogHeadline">每一片异境，都有一场自己的游戏。</h2>
+        <p id="catalogDescription">这里有可爱的猜猫、热血的修仙，也有一场已经苏醒的猫咪异界。选择一个世界，开始游玩。</p>
+      </section>
+
+      <section id="worldCards" class="world-cards" aria-label="异界目录"></section>
+      <p id="catalogNote" class="catalog-note">世界会记住你的每一次选择。</p>
+      <div class="creator-entry"><a id="creatorEntry" href="/create/">设计关卡</a></div>
+    </section>
+
+    <section id="introView" class="intro-view" hidden>
+      <div class="intro-topbar">
+        <button class="back-button" data-back-catalog type="button">← 返回世界</button>
+        <button id="shelfOpenIntro" class="icon-button compact shelf-icon" data-shelf-open type="button" aria-label="我的手办柜"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v6H4zM4 14h7v6H4zM15 14h5v6h-5zM6.5 7h1M11 7h1M15.5 7h1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button id="langToggleIntro" class="icon-button compact lang-button" type="button" aria-label="Switch language">EN</button>
+      </div>
+      <iframe id="openingFrame" class="opening-frame" title="异界开场" scrolling="no" sandbox="allow-scripts"></iframe>
+      <img id="openingImage" class="opening-frame opening-image" alt="" hidden>
+      <div id="openingFallback" class="opening-fallback" hidden aria-live="polite"><p class="eyebrow">WORLD OPENING</p><h2></h2><p></p></div>
+      <video id="openingVideo" class="opening-frame opening-video" autoplay muted playsinline preload="metadata" hidden></video>
+      <section id="levelSelect" class="level-select" hidden aria-label="选择篇章">
+        <p id="levelSelectEyebrow" class="eyebrow">WORLD CHAPTERS</p>
+        <h2 id="levelSelectTitle">选择篇章开始</h2>
+        <div id="levelCards" class="level-cards"></div>
+      </section>
+      <button id="beginJourney" class="opening-enter" type="button">睁开猫眼</button>
+    </section>
+
+    <section id="gameView" class="game-view" hidden>
+      <header class="game-header">
+        <button class="back-button compact" data-back-catalog type="button">← 世界</button>
+        <div class="world-mini"><small id="worldMiniTitle">唯咪独尊</small><strong id="sceneProgress">01 / 07</strong></div>
+        <div class="header-actions">
+          <button id="shelfOpenGame" class="icon-button compact shelf-icon" data-shelf-open type="button" aria-label="我的手办柜"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v6H4zM4 14h7v6H4zM15 14h5v6h-5zM6.5 7h1M11 7h1M15.5 7h1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button id="textToggle" class="icon-button compact text-toggle" type="button" aria-label="放大文字">A＋</button>
+          <button id="langToggleGame" class="icon-button compact lang-button" type="button" aria-label="Switch language">EN</button>
+          <button id="soundToggle" class="icon-button compact" type="button" aria-label="切换声音">♫</button>
+        </div>
+      </header>
+
+      <div id="professionChip" class="profession-chip" hidden></div>
+      <div id="meters" class="meters" aria-label="当前状态"></div>
+
+      <section class="scene-copy">
+        <p id="sceneChapter">第一巡</p>
+        <h2 id="sceneTitle">正在开启异境……</h2>
+        <div id="enemyStats" class="enemy-stats" hidden></div>
+      </section>
+
+      <section id="visualStage" class="visual-stage" aria-label="当前画面">
+        <img id="sceneImage" class="scene-image" alt="" decoding="async">
+        <div id="sceneMissing" class="scene-missing" hidden>场景图片暂时没有加载出来</div>
+        <div id="resultFlash" class="result-flash" hidden></div>
+      </section>
+
+      <p id="sceneDescription" class="scene-description"></p>
+      <div id="choicePanel" class="choice-panel" aria-label="选择动作"></div>
+      <section id="outcomePanel" class="outcome-panel" hidden>
+        <p id="outcomeText"></p>
+        <div id="outcomeMilestone" class="outcome-milestone"></div>
+        <div id="deltaChips" class="delta-chips"></div>
+        <button id="continueButton" type="button">继续看下去 <b>→</b></button>
+      </section>
+    </section>
+
+    <section id="endingView" class="ending-view" hidden>
+      <button class="back-button ending-back" data-back-catalog type="button">← 返回世界</button>
+      <div class="ending-stage" aria-label="结局动画">
+        <video id="endingVideo" autoplay muted playsinline preload="metadata" hidden></video>
+        <button id="replayEndingVideo" class="ending-video-replay" type="button" hidden>
+          <span aria-hidden="true">↻</span>
+          <span data-i18n="replayVideo">重新播放</span>
+        </button>
+        <img id="endingImage" class="ending-image" alt="" hidden>
+        <svg id="endingArt" viewBox="0 0 800 800" role="img" aria-label="完整的小猫出现在房间中央"></svg>
+        <p data-i18n="endingEyebrow">你的世界回响</p>
+      </div>
+      <article class="ending-card">
+        <p class="eyebrow">你的世界回响</p>
+        <h2 id="endingTitle"></h2>
+        <p id="endingDescription"></p>
+        <div id="finalStats" class="final-stats"></div>
+        <div id="keepsakeBox" class="keepsake">
+          <div class="keepsake-row">
+            <button id="keepsakeOpen" class="keepsake-open" type="button">
+              <span class="keepsake-thumb"><img id="keepsakeThumb" alt=""><span class="keepsake-badge">3D</span></span>
+              <span class="keepsake-copy">
+                <small data-i18n="keepsakeLabel">获得结局信物</small>
+                <strong id="keepsakeTitle">唯咪印玺</strong>
+                <em id="keepsakeStory" class="keepsake-story" hidden></em>
+                <em data-i18n="keepsakeOpenHint">点击进入 3D 展厅</em>
+              </span>
+            </button>
+            <a id="keepsakeImage" class="keepsake-download" href="#" download aria-label="Download image" title="Download image">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 15l4.5-4.5 4 4L16 11l4 4M9 9.5a1 1 0 1 0 0-.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a id="keepsakeDownload" class="keepsake-download" href="#" download aria-label="Download GLB" title="Download GLB">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4.2-4.2M12 14 7.8 9.8M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+          <a id="keepsakeGet" class="keepsake-get" href="https://studio.tripo3d.ai/" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span data-i18n="keepsakeGet">拿到它</span>
+            <small data-i18n="keepsakeGetHint">3D 打印 · 做成实物</small>
+          </a>
+          <button id="shelfOpen" class="shelf-open" type="button" data-shelf-open data-i18n="shelfOpen">我的手办柜</button>
+        </div>
+        <details id="tuntunBox" class="tuntun" hidden>
+          <summary data-i18n="tuntunSummary">彩蛋：一只真实的猫</summary>
+          <figure>
+            <img id="tuntunImage" alt="Tuntun">
+            <figcaption id="tuntunCaption"></figcaption>
+          </figure>
+        </details>
+        <div id="collectionBox"></div>
+        <button id="replayButton" type="button">再玩一次</button>
+      </article>
+    </section>
+    <audio id="worldMusic" loop preload="metadata"></audio>
+
+    <div id="shelfModal" class="ks-modal shelf-modal" hidden>
+      <div class="ks-backdrop" data-shelf-close></div>
+      <section class="ks-panel shelf-panel" role="dialog" aria-modal="true" aria-labelledby="shelfTitle">
+        <header class="ks-head">
+          <div><p class="eyebrow" data-i18n="shelfEyebrow">已收集的结局</p><h2 id="shelfTitle" data-i18n="shelfTitle">手办柜</h2><p id="shelfCount" class="shelf-count"></p></div>
+          <button id="shelfClose" class="ks-close" type="button" aria-label="Close" data-shelf-close>×</button>
+        </header>
+        <div id="shelfGrid" class="shelf-grid"></div>
+        <footer class="shelf-foot"><button id="shelfContinue" class="shelf-continue" type="button" data-i18n="shelfContinue">继续冒险</button></footer>
+      </section>
+    </div>
+    <div id="keepsakeModal" class="ks-modal" hidden>
+      <div class="ks-backdrop" data-ks-close></div>
+      <section class="ks-panel" role="dialog" aria-modal="true" aria-labelledby="ksTitle">
+        <header class="ks-head">
+          <div><p class="eyebrow" data-i18n="keepsakeLabel">获得结局信物</p><h2 id="ksTitle">信物</h2><p id="ksStory" class="ks-story" hidden></p></div>
+          <button id="ksClose" class="ks-close" type="button" aria-label="Close" data-ks-close>×</button>
+        </header>
+        <div id="ksStage" class="ks-stage">
+          <canvas id="keepsakeCanvas"></canvas>
+          <div id="keepsakeFallback" class="seal" hidden aria-hidden="true"><i>咪</i></div>
+          <div id="ksLoading" class="ks-loading" data-i18n="ksLoading">正在载入 3D 模型…</div>
+        </div>
+        <footer class="ks-foot">
+          <p class="ks-hint" data-i18n="keepsakeHint">拖动旋转 · 滚轮缩放</p>
+          <a id="ksGet" class="ks-get" href="https://studio.tripo3d.ai/" target="_blank" rel="noopener noreferrer">
+            <span data-i18n="keepsakeGet">拿到它</span>
+          </a>
+          <a id="ksImage" class="ks-download" href="#" download>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM4 15l4.5-4.5 4 4L16 11l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span data-i18n="keepsakeImage">下载图片</span>
+          </a>
+          <a id="ksDownload" class="ks-download" href="#" download>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4.2-4.2M12 14 7.8 9.8M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span data-i18n="keepsakeDownload">下载 GLB</span>
+          </a>
+        </footer>
+      </section>
+    </div>
+  </main>
+  <script src="app/app.js?v=33"></script>
+  <script type="module" src="app/keepsake-viewer.js?v=2"></script>
+</body>
+</html>

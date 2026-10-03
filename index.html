@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一句话生成小游戏 · GlimmersElsewhereCreate</title>
+  <style>
+    :root { --ink:#211a2e; --violet:#6b4bb9; --gold:#f4c66d; --bg:#efe9e0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: radial-gradient(circle at 20% 0%, #ffffff, var(--bg)); color: var(--ink); font: 15px/1.6 "PingFang SC", "Helvetica Neue", sans-serif; }
+    main { width: min(100%, 760px); margin: 32px 18px; padding: 30px 28px 26px; border-radius: 26px; background: #fff; box-shadow: 0 24px 70px rgba(48, 31, 70, .14); }
+    h1 { margin: 4px 0 6px; font: 900 30px/1.2 "Songti SC", serif; }
+    .eyebrow { margin: 0; color: var(--violet); font-weight: 800; letter-spacing: .16em; font-size: 11px; }
+    p.lead { margin: 0 0 18px; color: #6d6577; }
+    label { display: block; margin: 14px 0 6px; font-weight: 700; font-size: 13px; }
+    input[type=text], input[type=password], textarea { width: 100%; padding: 13px 14px; border: 1px solid #ddd3e6; border-radius: 14px; font: inherit; background: #fbf9ff; }
+    textarea { min-height: 84px; resize: vertical; }
+    details { margin: 16px 0 4px; padding: 14px 16px; border-radius: 16px; background: #f6f2fb; }
+    summary { cursor: pointer; font-weight: 800; color: #4c4358; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+    button { padding: 14px 22px; border: 0; border-radius: 15px; background: var(--gold); color: #2e233f; font: 800 16px inherit; cursor: pointer; }
+    button[disabled] { opacity: .55; cursor: default; }
+    .check { display: flex; align-items: center; gap: 8px; color: #6d6577; font-size: 13px; }
+    #status { margin-top: 18px; padding: 14px 16px; border-radius: 16px; background: #f6f2fb; color: #4c4358; font-size: 13px; white-space: pre-wrap; }
+    #result { display: none; margin-top: 20px; padding: 18px; border-radius: 18px; background: linear-gradient(135deg, #fff6dc, #f7e6b8); }
+    #result h2 { margin: 0 0 4px; font: 900 22px/1.25 "Songti SC", serif; }
+    #result img { width: 100%; max-width: 320px; border-radius: 16px; display: block; margin: 12px 0; }
+    #result a { display: inline-block; margin-top: 10px; padding: 12px 18px; border-radius: 13px; background: var(--violet); color: #fff; text-decoration: none; font-weight: 800; }
+    code { background: #efe8fb; padding: 2px 6px; border-radius: 7px; font-size: 12px; }
+    .hint { margin-top: 8px; color: #8d8597; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">ONE SENTENCE · ONE LITTLE WORLD</p>
+    <h1>一句话，生成一个小游戏</h1>
+    <p class="lead">写一句话主题，自动生成一个可以立刻试玩的单关卡小世界：设定卡 → 剧情 JSON →（可选）配图 → 打包成可玩世界。本工具不带任何内置密钥，用你自己的 API。</p>
+
+    <details id="apiBox">
+      <summary>我的 API 设置（只保存在本机浏览器）</summary>
+      <label for="apiBase">大模型接口地址</label>
+      <input id="apiBase" type="text" value="https://api.deepseek.com" placeholder="https://api.deepseek.com">
+      <div class="grid2">
+        <div>
+          <label for="apiKey">API Key</label>
+          <input id="apiKey" type="password" autocomplete="off" placeholder="sk-...">
+        </div>
+        <div>
+          <label for="apiModel">模型</label>
+          <input id="apiModel" type="text" value="deepseek-chat" placeholder="deepseek-chat">
+        </div>
+      </div>
+      <p class="hint">任何 OpenAI 兼容接口都可以：DeepSeek、Kimi、智谱、OpenAI……填它自己的网址、Key、模型即可。地址和 Key 只保存在你的浏览器里，生成时才会发给你本机的服务。</p>
+      <label for="imageBase">图片接口地址（可选，留空就不出图）</label>
+      <input id="imageBase" type="text" placeholder="例如 https://api.openai.com/v1">
+      <div class="grid2">
+        <div>
+          <label for="imageKey">图片 API Key（可选）</label>
+          <input id="imageKey" type="password" autocomplete="off">
+        </div>
+        <div>
+          <label for="imageModel">图片模型（可选）</label>
+          <input id="imageModel" type="text" placeholder="gpt-image-1">
+        </div>
+      </div>
+    </details>
+
+    <label for="sentence">一句话主题</label>
+    <textarea id="sentence">做一个猫猫勇者战胜邪恶魔王的小游戏</textarea>
+    <p class="hint">默认：8 个事件、3 个结局、中英双语。完整生成的时间取决于你的接口速度（一般几分钟）。</p>
+
+    <div class="row">
+      <button id="go">开始生成</button>
+      <label class="check"><input id="planOnly" type="checkbox"> 快速模式（只出剧情，不出图）</label>
+    </div>
+
+    <div id="status">等待输入…</div>
+
+    <section id="result">
+      <h2 id="resultTitle"></h2>
+      <img id="resultCover" alt="生成的小世界封面">
+      <p id="resultMeta"></p>
+      <a id="resultPlay" href="#" target="_blank">▶ 立即试玩</a>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const FIELDS = ["apiBase", "apiKey", "apiModel", "imageBase", "imageKey", "imageModel"];
+    const STORE = "glimmers-create-api-v1";
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE) || "{}");
+      for (const id of FIELDS) if (typeof saved[id] === "string" && saved[id]) $(id).value = saved[id];
+    } catch (error) { /* first visit */ }
+    for (const id of FIELDS) {
+      $(id).addEventListener("input", () => {
+        const data = {};
+        for (const key of FIELDS) data[key] = $(key).value.trim();
+        localStorage.setItem(STORE, JSON.stringify(data));
+      });
+    }
+
+    let timer = null;
+    $("go").addEventListener("click", async () => {
+      const sentence = $("sentence").value.trim();
+      if (!sentence) return;
+      if (!$("apiKey").value.trim()) {
+        $("apiBox").open = true;
+        $("status").textContent = "先在「我的 API 设置」里填上你自己的 API Key。";
+        return;
+      }
+      $("go").disabled = true;
+      $("result").style.display = "none";
+      const started = Date.now();
+      const tick = () => { $("status").textContent = `生成中… 已用时 ${Math.round((Date.now() - started) / 1000)} 秒\n（剧情约 1 分钟；带配图的完整生成一般几分钟）`; };
+      tick();
+      timer = setInterval(tick, 1000);
+      try {
+        const response = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sentence,
+            planOnly: $("planOnly").checked,
+            api: {
+              base: $("apiBase").value.trim(),
+              key: $("apiKey").value.trim(),
+              model: $("apiModel").value.trim(),
+              imageBase: $("imageBase").value.trim(),
+              imageKey: $("imageKey").value.trim(),
+              imageModel: $("imageModel").value.trim(),
+            },
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+          $("status").textContent = `失败：${data.error || response.status}\n\n${(data.log || "").slice(-1200)}`;
+          return;
+        }
+        if (data.planOnly) {
+          $("status").textContent = `策划完成（快速模式，未出图）：${data.seconds} 秒 · AI 调用 ${data.calls} 次\n标题：${data.title}\n工作目录：${data.workDir}\n\n${(data.log || "").slice(-800)}`;
+          return;
+        }
+        $("status").textContent = `完成：${data.seconds} 秒 · AI 调用 ${data.calls} 次\n世界 id：${data.worldId}\n工作目录：${data.workDir}\n\n${(data.log || "").slice(-800)}`;
+        $("resultTitle").textContent = data.title;
+        const cover = $("resultCover");
+        cover.style.display = "";
+        cover.onerror = () => { cover.style.display = "none"; };
+        cover.src = `/worlds/${data.worldId}/assets/cover.png?v=${Date.now()}`;
+        $("resultMeta").innerHTML = `试玩地址：<code>${data.playUrl}</code>`;
+        $("resultPlay").href = data.playUrl;
+        $("result").style.display = "block";
+      } catch (error) {
+        $("status").textContent = `失败：${error}`;
+      } finally {
+        clearInterval(timer);
+        $("go").disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
