@@ -56,6 +56,8 @@ worlds/                      生成结果：worlds/<slug>/world.json + 图片 + 
 artifacts/                   生成过程缓存（已被 .gitignore 忽略）
 ```
 
+生成的世界默认只留在本地（`worlds/*/` 已被 `.gitignore` 忽略）；想把它提交到你的仓库分享，用 `git add -f worlds/<slug>`。
+
 ## 进阶用法
 
 ```bash

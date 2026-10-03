@@ -3,3 +3,5 @@ __pycache__/
 artifacts/
 .DS_Store
 config.json
+# 生成的世界默认只留在本地；想分享某一个就用 git add -f worlds/<slug>
+worlds/*/
