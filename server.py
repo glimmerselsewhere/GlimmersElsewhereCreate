@@ -44,6 +44,7 @@ API_ENV = (
     ("imageBase", "GLIMMERS_IMAGE_BASE"),
     ("imageKey", "GLIMMERS_IMAGE_KEY"),
     ("imageModel", "GLIMMERS_IMAGE_MODEL"),
+    ("imageExtra", "GLIMMERS_IMAGE_EXTRA"),
 )
 
 
@@ -169,10 +170,14 @@ class Handler(SimpleHTTPRequestHandler):
             "imageBase": image_cfg.get("base"),
             "imageKey": image_cfg.get("key"),
             "imageModel": image_cfg.get("model"),
+            "imageExtra": json.dumps(image_cfg.get("extra"), ensure_ascii=False) if image_cfg.get("extra") else "",
         }
         env = dict(os.environ)
         for field, env_name in API_ENV:
-            value = str(api.get(field) or "").strip() or str(fallback.get(field) or "").strip()
+            raw = api.get(field)
+            if isinstance(raw, dict):
+                raw = json.dumps(raw, ensure_ascii=False)
+            value = str(raw or "").strip() or str(fallback.get(field) or "").strip()
             if value:
                 env[env_name] = value
         if not env.get("GLIMMERS_LLM_KEY"):

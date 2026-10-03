@@ -37,12 +37,13 @@
 ```jsonc
 {
   "llm":   { "base": "https://api.deepseek.com", "key": "你的 Key", "model": "deepseek-chat" },
-  "image": { "base": "", "key": "", "model": "gpt-image-1" }   // 图片接口留空 = 不出图
+  "image": { "base": "", "key": "", "model": "gpt-image-1", "extra": {} }   // 图片接口留空 = 不出图
 }
 ```
 
 - 优先级：页面输入 → `config.json` → 内置默认值（`https://api.deepseek.com` + `deepseek-chat`）。
 - `config.json` 只在本机使用：不提交、不通过网页读取、不写日志；对外分享这个项目时它不会被带出去。
+- 图片接口如果要求额外参数（比如某些网关需要 `ratio` / `extra_body`），写进 `image.extra`，会原样合并进请求体。
 
 ## 目录结构
 

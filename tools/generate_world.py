@@ -51,6 +51,7 @@ LLM_MODEL = os.environ.get("GLIMMERS_LLM_MODEL", "deepseek-chat").strip() or "de
 IMAGE_BASE = os.environ.get("GLIMMERS_IMAGE_BASE", "").strip().rstrip("/")
 IMAGE_KEY = os.environ.get("GLIMMERS_IMAGE_KEY", "").strip()
 IMAGE_MODEL = os.environ.get("GLIMMERS_IMAGE_MODEL", "gpt-image-1").strip() or "gpt-image-1"
+IMAGE_EXTRA = os.environ.get("GLIMMERS_IMAGE_EXTRA", "").strip()
 PLAY_BASE = os.environ.get("GLIMMERS_PLAY_BASE", "http://127.0.0.1:8096").rstrip("/")
 CALLS = 0
 
@@ -204,7 +205,17 @@ def gen_image(prompt: str, output: Path, reference: Path | None = None) -> str:
         return f"skip {output.name}"
     if not (IMAGE_BASE and IMAGE_KEY):
         return f"skip {output.name} (no image API configured)"
-    payload = {"model": IMAGE_MODEL, "prompt": prompt, "n": 1, "size": "1024x1024"}
+    payload = {"model": IMAGE_MODEL, "prompt": prompt, "n": 1}
+    extra = None
+    if IMAGE_EXTRA:
+        try:
+            extra = json.loads(IMAGE_EXTRA)
+        except ValueError:
+            extra = None
+    if isinstance(extra, dict) and extra:
+        payload.update(extra)
+    else:
+        payload["size"] = "1024x1024"
     last = None
     for attempt in range(3):
         try:
