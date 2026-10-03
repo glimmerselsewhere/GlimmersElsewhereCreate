@@ -31,6 +31,25 @@ HOST = os.environ.get("GLIMMERS_CREATE_HOST", "127.0.0.1")
 PORT = int(os.environ.get("GLIMMERS_CREATE_PORT", "8096"))
 MAX_BODY_BYTES = 64 * 1024
 
+MESSAGES = {
+    "en": {
+        "too_large": "Request body too large",
+        "sentence": "Please write one sentence (max 200 characters).",
+        "no_key": "No API key yet: copy config.example.json to config.json, or type one on the page.",
+        "busy": "Another generation is already running — please wait a moment.",
+        "timeout": "Timed out (1 hour).",
+        "failed": "Generation failed.",
+    },
+    "zh": {
+        "too_large": "请求体过大",
+        "sentence": "请输入一句话（不超过 200 字）",
+        "no_key": "还没有 API Key：把 config.example.json 复制成 config.json 填好，或在页面的输入框里填一个。",
+        "busy": "已有任务在生成中，请稍后再试",
+        "timeout": "超时（1 小时）",
+        "failed": "生成失败",
+    },
+}
+
 lock = threading.Lock()
 busy = False
 progress_lock = threading.Lock()
@@ -148,16 +167,18 @@ class Handler(SimpleHTTPRequestHandler):
         except ValueError:
             length = 0
         if length > MAX_BODY_BYTES:
-            self.send_json({"error": "请求体过大"}, 413)
+            self.send_json({"error": MESSAGES["en"]["too_large"]}, 413)
             return
         try:
             body = json.loads(self.rfile.read(length) or b"{}")
         except ValueError:
             self.send_json({"error": "bad request"}, 400)
             return
+        lang = str(body.get("lang") or "en").strip().lower()
+        m = MESSAGES.get(lang, MESSAGES["en"])
         sentence = str(body.get("sentence", "")).strip()
         if not sentence or len(sentence) > 200:
-            self.send_json({"error": "请输入一句话（不超过 200 字）"}, 400)
+            self.send_json({"error": m["sentence"]}, 400)
             return
         api = body.get("api") or {}
         cfg = load_config()
@@ -181,13 +202,13 @@ class Handler(SimpleHTTPRequestHandler):
             if value:
                 env[env_name] = value
         if not env.get("GLIMMERS_LLM_KEY"):
-            self.send_json({"error": "还没有 API Key：把 config.example.json 复制成 config.json 填好，或在页面的输入框里填一个。"}, 400)
+            self.send_json({"error": m["no_key"]}, 400)
             return
         env["GLIMMERS_PLAY_BASE"] = f"http://{HOST}:{PORT}"
 
         with lock:
             if busy or progress["running"]:
-                self.send_json({"error": "已有任务在生成中，请稍后再试"}, 429)
+                self.send_json({"error": m["busy"]}, 429)
                 return
             busy = True
         try:
@@ -208,18 +229,18 @@ class Handler(SimpleHTTPRequestHandler):
             except subprocess.TimeoutExpired:
                 proc.kill()
                 proc.wait()
-                self.send_json({"error": "超时（1 小时）"}, 504)
+                self.send_json({"error": m["timeout"]}, 504)
                 return
             with progress_lock:
                 log = "\n".join(progress["lines"]) + "\n"
             elapsed = round(time.time() - started, 1)
             match = re.search(r"^RESULT (\{.*\})$", log, flags=re.M)
             if not match:
-                self.send_json({"error": "生成失败", "log": log[-4000:]}, 500)
+                self.send_json({"error": m["failed"], "log": log[-4000:]}, 500)
                 return
             payload = json.loads(match.group(1))
             if not payload.get("ok", True):
-                self.send_json({"error": payload.get("error") or "生成失败", "log": log[-4000:]}, 500)
+                self.send_json({"error": payload.get("error") or m["failed"], "log": log[-4000:]}, 500)
                 return
             payload["seconds"] = elapsed
             payload["log"] = log[-4000:]
