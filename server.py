@@ -25,6 +25,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 PIPELINE = ROOT / "tools" / "generate_world.py"
+CONFIG_PATH = ROOT / "config.json"
 
 HOST = os.environ.get("GLIMMERS_CREATE_HOST", "127.0.0.1")
 PORT = int(os.environ.get("GLIMMERS_CREATE_PORT", "8096"))
@@ -43,6 +44,33 @@ API_ENV = (
 )
 
 
+def load_config() -> dict:
+    """Local config.json (gitignored). Never served over HTTP, never logged."""
+    try:
+        data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def config_digest() -> dict:
+    cfg = load_config()
+    llm = cfg.get("llm") or {}
+    image = cfg.get("image") or {}
+    return {
+        "llm": {
+            "base": str(llm.get("base") or "").strip(),
+            "model": str(llm.get("model") or "").strip(),
+            "hasKey": bool(str(llm.get("key") or "").strip()),
+        },
+        "image": {
+            "base": str(image.get("base") or "").strip(),
+            "model": str(image.get("model") or "").strip(),
+            "hasKey": bool(str(image.get("key") or "").strip()),
+        },
+    }
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -57,6 +85,17 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def do_GET(self):
+        path = self.path.split("?", 1)[0]
+        if path == "/api/config":
+            self.send_json(config_digest())
+            return
+        if path in ("/config.json", "/config.local.json") or path.endswith("/config.json"):
+            # The key file is local-only: never expose it through the web page.
+            self.send_json({"error": "config.json 只在本机使用，不通过网页提供"}, 403)
+            return
+        super().do_GET()
 
     def do_POST(self):
         global busy
@@ -80,11 +119,25 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_json({"error": "请输入一句话（不超过 200 字）"}, 400)
             return
         api = body.get("api") or {}
+        cfg = load_config()
+        llm_cfg = cfg.get("llm") or {}
+        image_cfg = cfg.get("image") or {}
+        fallback = {
+            "base": llm_cfg.get("base"),
+            "key": llm_cfg.get("key"),
+            "model": llm_cfg.get("model"),
+            "imageBase": image_cfg.get("base"),
+            "imageKey": image_cfg.get("key"),
+            "imageModel": image_cfg.get("model"),
+        }
         env = dict(os.environ)
         for field, env_name in API_ENV:
-            value = str(api.get(field) or "").strip()
+            value = str(api.get(field) or "").strip() or str(fallback.get(field) or "").strip()
             if value:
                 env[env_name] = value
+        if not env.get("GLIMMERS_LLM_KEY"):
+            self.send_json({"error": "还没有 API Key：把 config.example.json 复制成 config.json 填好，或在页面的输入框里填一个。"}, 400)
+            return
         env["GLIMMERS_PLAY_BASE"] = f"http://{HOST}:{PORT}"
 
         with lock:
@@ -124,7 +177,11 @@ class Handler(SimpleHTTPRequestHandler):
 def main() -> int:
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     print(f"create entry: http://{HOST}:{PORT}/")
-    print("  type your own API endpoint + key on the page; nothing is stored on this machine.")
+    digest = config_digest()
+    if digest["llm"]["hasKey"]:
+        print(f"  config.json loaded: {digest['llm']['base'] or '(default base)'} · model {digest['llm']['model'] or '(default)'}")
+    else:
+        print("  no config.json yet: copy config.example.json to config.json, or type the key on the page.")
     server.serve_forever()
     return 0
 

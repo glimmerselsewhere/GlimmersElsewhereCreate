@@ -1,0 +1,12 @@
+{
+  "llm": {
+    "base": "https://api.deepseek.com",
+    "key": "",
+    "model": "deepseek-chat"
+  },
+  "image": {
+    "base": "",
+    "key": "",
+    "model": "gpt-image-1"
+  }
+}

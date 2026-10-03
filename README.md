@@ -1,4 +1,4 @@
-# GlimmersElsewhereCreate · 一句话，生成一个小游戏
+# GlimmersElsewhereCreate · 一句话，生成一个文字冒险小游戏
 
 把你的一句话主题，生成一个**可以在本地立刻试玩**的单关卡小世界：
 设定卡 → 剧情 JSON（中英双语）→ 配图（可选）→ 打包成带入口页的可玩世界。
@@ -15,10 +15,11 @@
    python3 server.py
    ```
 
-3. 打开 <http://127.0.0.1:8096/>，在「我的 API 设置」里填上你自己的接口：
-   - 接口地址：`https://api.deepseek.com`（默认示例；任何 OpenAI 兼容服务都行）
-   - API Key：你自己的 Key（只保存在你的浏览器里）
-   - 模型：`deepseek-chat`
+3. 配置你自己的接口（二选一，推荐前者）：
+   - **本地配置文件**：把 `config.example.json` 复制成 `config.json`，填上你的接口地址 / Key / 模型。
+     这个文件已被 `.gitignore` 忽略，**不会被上传**；服务也不会通过网页提供它。
+   - 或者打开 <http://127.0.0.1:8096/>，在「我的 API 设置」里临时填写（只保存在你的浏览器里）。
+     页面里填的内容会覆盖 `config.json`，留空则用文件里的。
 4. 写一句话 → 点「开始生成」。
 5. 完成后点「立即试玩」：`worlds/<slug>/` 里就是完整的世界（`world.json`、中英文文案、入口页），
    可以直接玩，也可以 push 到你自己的仓库分享。
@@ -30,6 +31,18 @@
 - **配图是可选的**：填了「图片接口」才会出图（`POST {图片地址}/images/generations`，`b64_json` 或 `url` 返回都支持）；
   留空则只生成剧情，游戏内图片位置显示占位。
 - 「模型」可以填逗号分隔的多个模型作为失败回退链，例如 `deepseek-chat,deepseek-reasoner`。
+
+## 本地配置（config.json）
+
+```jsonc
+{
+  "llm":   { "base": "https://api.deepseek.com", "key": "你的 Key", "model": "deepseek-chat" },
+  "image": { "base": "", "key": "", "model": "gpt-image-1" }   // 图片接口留空 = 不出图
+}
+```
+
+- 优先级：页面输入 → `config.json` → 内置默认值（`https://api.deepseek.com` + `deepseek-chat`）。
+- `config.json` 只在本机使用：不提交、不通过网页读取、不写日志；对外分享这个项目时它不会被带出去。
 
 ## 目录结构
 
@@ -57,9 +70,10 @@ python3 tools/generate_world.py --sentence "……" --from-stage assemble   # �
 
 ## English
 
-GlimmersElsewhereCreate turns one sentence into a playable single-level world, locally.
+GlimmersElsewhereCreate turns one sentence into a playable little text-adventure world, locally.
 
-- `python3 server.py` → <http://127.0.0.1:8096/> → paste your own OpenAI-compatible endpoint + key.
+- `python3 server.py` → <http://127.0.0.1:8096/>. Put your own endpoint + key in `config.json`
+  (copy of `config.example.json`, gitignored) or type them on the page.
 - Optional images: point the image fields at any `/images/generations` endpoint.
 - Output: `worlds/<slug>/` — `world.json`, Chinese/English text, assets, and a playable entry page.
 - This repository contains no API keys, internal endpoints, or private data.

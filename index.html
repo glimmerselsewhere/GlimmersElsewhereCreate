@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>一句话生成小游戏 · GlimmersElsewhereCreate</title>
+  <title>一句话，生成一个文字冒险小游戏 · GlimmersElsewhereCreate</title>
   <style>
     :root { --ink:#211a2e; --violet:#6b4bb9; --gold:#f4c66d; --bg:#efe9e0; }
     * { box-sizing: border-box; }
@@ -34,13 +34,13 @@
 <body>
   <main>
     <p class="eyebrow">ONE SENTENCE · ONE LITTLE WORLD</p>
-    <h1>一句话，生成一个小游戏</h1>
-    <p class="lead">写一句话主题，自动生成一个可以立刻试玩的单关卡小世界：设定卡 → 剧情 JSON →（可选）配图 → 打包成可玩世界。本工具不带任何内置密钥，用你自己的 API。</p>
+    <h1>一句话，生成一个文字冒险小游戏</h1>
+    <p class="lead">写一句话主题，自动生成一个可以立刻试玩的文字冒险小世界：设定卡 → 剧情 JSON →（可选）配图 → 打包成可玩世界。接口和 Key 可以写在本地 <code>config.json</code>（页面里不填也行）；本工具不带任何内置密钥。</p>
 
     <details id="apiBox">
-      <summary>我的 API 设置（只保存在本机浏览器）</summary>
+      <summary>我的 API 设置（可选；优先用本地 config.json）</summary>
       <label for="apiBase">大模型接口地址</label>
-      <input id="apiBase" type="text" value="https://api.deepseek.com" placeholder="https://api.deepseek.com">
+      <input id="apiBase" type="text" placeholder="https://api.deepseek.com">
       <div class="grid2">
         <div>
           <label for="apiKey">API Key</label>
@@ -48,10 +48,10 @@
         </div>
         <div>
           <label for="apiModel">模型</label>
-          <input id="apiModel" type="text" value="deepseek-chat" placeholder="deepseek-chat">
+          <input id="apiModel" type="text" placeholder="deepseek-chat">
         </div>
       </div>
-      <p class="hint">任何 OpenAI 兼容接口都可以：DeepSeek、Kimi、智谱、OpenAI……填它自己的网址、Key、模型即可。地址和 Key 只保存在你的浏览器里，生成时才会发给你本机的服务。</p>
+      <p class="hint" id="apiHint">任何 OpenAI 兼容接口都可以：DeepSeek、Kimi、智谱、OpenAI……把 <code>config.example.json</code> 复制成 <code>config.json</code> 填好即可（该文件不会被上传）；页面里填的内容会覆盖文件里的，留空则用文件里的。</p>
       <label for="imageBase">图片接口地址（可选，留空就不出图）</label>
       <input id="imageBase" type="text" placeholder="例如 https://api.openai.com/v1">
       <div class="grid2">
@@ -88,6 +88,7 @@
     const $ = (id) => document.getElementById(id);
     const FIELDS = ["apiBase", "apiKey", "apiModel", "imageBase", "imageKey", "imageModel"];
     const STORE = "glimmers-create-api-v1";
+    let configInfo = { llm: {}, image: {} };
 
     try {
       const saved = JSON.parse(localStorage.getItem(STORE) || "{}");
@@ -101,13 +102,29 @@
       });
     }
 
+    async function loadConfig() {
+      try {
+        const response = await fetch("/api/config");
+        configInfo = await response.json();
+      } catch (error) { /* no config file */ }
+      $("apiBase").placeholder = configInfo.llm?.base || "https://api.deepseek.com";
+      $("apiModel").placeholder = configInfo.llm?.model || "deepseek-chat";
+      $("apiKey").placeholder = configInfo.llm?.hasKey ? "已从 config.json 读取（留空即可）" : "sk-...";
+      $("imageBase").placeholder = configInfo.image?.base || "例如 https://api.openai.com/v1";
+      $("imageModel").placeholder = configInfo.image?.model || "gpt-image-1";
+      if (configInfo.llm?.hasKey) {
+        $("apiHint").innerHTML = "已读到本地 <code>config.json</code> 里的接口和 Key —— 页面里什么都不用填。想临时换接口，在下面输入即可（会覆盖文件里的）。";
+      }
+    }
+    loadConfig();
+
     let timer = null;
     $("go").addEventListener("click", async () => {
       const sentence = $("sentence").value.trim();
       if (!sentence) return;
-      if (!$("apiKey").value.trim()) {
+      if (!$("apiKey").value.trim() && !configInfo.llm?.hasKey) {
         $("apiBox").open = true;
-        $("status").textContent = "先在「我的 API 设置」里填上你自己的 API Key。";
+        $("status").textContent = "还没有 API Key：把 config.example.json 复制成 config.json 填好，或在上面输入框里填一个。";
         return;
       }
       $("go").disabled = true;
