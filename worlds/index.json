@@ -1,14 +1,3 @@
 {
-  "worlds": [
-    {
-      "id": "cat-hero-dog-king",
-      "config": "cat-hero-dog-king/world.json",
-      "status": "ready",
-      "title": "猫猫勇者与狗狗魔王",
-      "titleEn": "The Cat Hero and the Dog Demon King",
-      "subtitleEn": "One paw at a time, bring the sunshine home",
-      "descriptionEn": "A timid orange cat sets out to reclaim the naptime sunshine hidden in the dog demon king's castle. No claws draw blood—only cushions, bells, and a wish to wake the town gently.",
-      "hidden": true
-    }
-  ]
+  "worlds": []
 }
