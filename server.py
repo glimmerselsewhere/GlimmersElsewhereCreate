@@ -81,9 +81,16 @@ def reset_progress() -> None:
         progress["lines"] = []
 
 
+def scrub_paths(text: str) -> str:
+    """Never leak absolute paths (or the local username) through progress / logs."""
+    text = text.replace(str(ROOT) + os.sep, "")
+    text = text.replace(str(ROOT), ".")
+    return re.sub(r"/Users/[^/\s:]+", "~", text)
+
+
 def append_log(line: str) -> None:
     with progress_lock:
-        progress["lines"].append(line.rstrip("\n"))
+        progress["lines"].append(scrub_paths(line.rstrip("\n")))
         if len(progress["lines"]) > MAX_LINES:
             del progress["lines"][:-MAX_LINES]
 

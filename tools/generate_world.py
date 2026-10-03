@@ -55,6 +55,14 @@ PLAY_BASE = os.environ.get("GLIMMERS_PLAY_BASE", "http://127.0.0.1:8096").rstrip
 CALLS = 0
 
 
+def rel(path) -> str:
+    """Logs and API payloads use paths relative to the project root (no usernames)."""
+    try:
+        return str(Path(path).resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def tls_context():
     """Prefer a certifi-verified TLS context; only fall back to the local workaround if needed."""
     try:
@@ -133,7 +141,18 @@ def _chat_completion(model: str, prompt: str) -> str:
         if error.code in (404, 405):
             return _responses_call(model, prompt)
         raise
-    return data["choices"][0]["message"]["content"]
+    if data.get("error"):
+        raise RuntimeError(f"endpoint error: {json.dumps(data['error'], ensure_ascii=False)[:200]}")
+    choice = (data.get("choices") or [{}])[0]
+    message = choice.get("message") or {}
+    content = message.get("content")
+    if isinstance(content, list):  # some gateways use Anthropic-style content blocks
+        content = "".join(part.get("text", "") for part in content if isinstance(part, dict))
+    content = content if isinstance(content, str) else ""
+    if not content.strip():
+        # 有些网关偶尔回空内容：换一条通道再试一次，随后交给上层重试。
+        return _responses_call(model, prompt)
+    return content
 
 
 def _responses_call(model: str, prompt: str) -> str:
@@ -561,7 +580,7 @@ def stage_assemble(seed: dict, level: dict, work: Path, keepsakes: list[dict] | 
     index_path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     write_entry_page(payload)
     missing = [job["path"] for job in build_prompts(seed, level, work) if not (world_dir / job["path"]).is_file()]
-    print(f"        world.json written to {world_dir}")
+    print(f"        world.json written to {rel(world_dir)}")
     if missing:
         print(f"        note: {len(missing)} image slots are empty (connect an image API to fill them)")
     return payload
@@ -618,12 +637,12 @@ def main() -> int:
     (work / "input.txt").write_text(sentence + "\n", encoding="utf-8")
     print(f"== one-shot world ==")
     print(f"   sentence: {sentence}")
-    print(f"   work dir: {work}")
+    print(f"   work dir: {rel(work)}")
 
     if skipped("seed"):
         seed_path = work / "world_seed.json"
         if not seed_path.is_file():
-            raise SystemExit(f"--from-stage {args.from_stage}: 缓存里没有 {seed_path}")
+            raise SystemExit(f"--from-stage {args.from_stage}: 缓存里没有 {rel(seed_path)}")
         seed = json.loads(seed_path.read_text(encoding="utf-8"))
         print("[1/6] seed: loaded from cache (skipped)")
     else:
@@ -645,7 +664,7 @@ def main() -> int:
     if skipped("level"):
         level_path = work / "level.json"
         if not level_path.is_file():
-            raise SystemExit(f"--from-stage {args.from_stage}: 缓存里没有 {level_path}")
+            raise SystemExit(f"--from-stage {args.from_stage}: 缓存里没有 {rel(level_path)}")
         level = json.loads(level_path.read_text(encoding="utf-8"))
         print("[3/6] level: loaded from cache (skipped)")
     else:
@@ -654,7 +673,7 @@ def main() -> int:
     if args.plan_only:
         print("[5/6] images: skipped (plan-only)")
         print("[6/6] assemble: skipped (plan-only)")
-        print(f"\nRESULT {json.dumps({'ok': True, 'planOnly': True, 'worldId': None, 'title': seed['title'], 'playUrl': None, 'workDir': str(work), 'calls': CALLS}, ensure_ascii=False)}")
+        print(f"\nRESULT {json.dumps({'ok': True, 'planOnly': True, 'worldId': None, 'title': seed['title'], 'playUrl': None, 'workDir': rel(work), 'calls': CALLS}, ensure_ascii=False)}")
         return 0
     if skipped("images"):
         print("[5/6] images: loaded from cache (skipped)")
@@ -662,9 +681,18 @@ def main() -> int:
         stage_images(seed, jobs, work, args.workers)
     payload = stage_assemble(seed, level, work, [], in_catalog=args.in_catalog)
     play = f"{PLAY_BASE}/worlds/{payload['id']}/?lang=zh"
-    print(f"\nRESULT {json.dumps({'ok': True, 'worldId': payload['id'], 'title': payload['title'], 'playUrl': play, 'workDir': str(work), 'calls': CALLS}, ensure_ascii=False)}")
+    print(f"\nRESULT {json.dumps({'ok': True, 'worldId': payload['id'], 'title': payload['title'], 'playUrl': play, 'workDir': rel(work), 'calls': CALLS}, ensure_ascii=False)}")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except SystemExit:
+        raise
+    except Exception as error:  # noqa: BLE001
+        if os.environ.get("GLIMMERS_DEBUG"):
+            raise
+        # 不打印带绝对路径的 traceback（会暴露本机用户名）；只留一行干净的错误。
+        print(f"\nRESULT {json.dumps({'ok': False, 'error': str(error)[:300], 'calls': CALLS}, ensure_ascii=False)}")
+        raise SystemExit(1)

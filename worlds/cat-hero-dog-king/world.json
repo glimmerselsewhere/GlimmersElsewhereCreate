@@ -1,0 +1,654 @@
+{
+  "id": "cat-hero-dog-king",
+  "title": "猫猫勇者与狗狗魔王",
+  "titleEn": "The Cat Hero and the Dog Demon King",
+  "shortTitle": "猫猫勇者与狗狗魔王",
+  "shortTitleEn": "The Cat Hero and the Dog Demon King",
+  "subtitle": "一爪一爪，把阳光讨回来",
+  "subtitleEn": "One paw at a time, bring the sunshine home",
+  "description": "怕黑的橘猫为了夺回被藏起的午睡阳光，走向狗狗魔王的城堡。没有利爪见血，只有软垫、铃铛，和一颗想把小镇叫醒的心。",
+  "descriptionEn": "A timid orange cat sets out to reclaim the naptime sunshine hidden in the dog demon king's castle. No claws draw blood—only cushions, bells, and a wish to wake the town gently.",
+  "mode": null,
+  "shuffleActions": false,
+  "assetBase": "worlds/cat-hero-dog-king/",
+  "cover": {
+    "default": "assets/cover.png"
+  },
+  "opening": {
+    "mode": "none"
+  },
+  "initialState": {
+    "courage": 2,
+    "wit": 1,
+    "bond": 0
+  },
+  "states": [
+    {
+      "id": "courage",
+      "label": "勇气",
+      "labelEn": "Courage",
+      "description": "害怕的时候还肯再往前走一步的程度",
+      "color": "#f4a261",
+      "chipBackground": "#eef2f7",
+      "max": 12
+    },
+    {
+      "id": "wit",
+      "label": "机智",
+      "labelEn": "Wit",
+      "description": "用铃铛、毛线和歪点子解开麻烦的本事",
+      "color": "#f6e7c1",
+      "chipBackground": "#eef2f7",
+      "max": 12
+    },
+    {
+      "id": "bond",
+      "label": "羁绊",
+      "labelEn": "Bond",
+      "description": "沿途交到的朋友，以及愿意听对方把话说完的心",
+      "color": "#6b8cae",
+      "chipBackground": "#eef2f7",
+      "max": 12
+    }
+  ],
+  "actions": [
+    {
+      "id": "courage",
+      "name": "勇气",
+      "plain": "勇气",
+      "icon": "✦"
+    },
+    {
+      "id": "wit",
+      "name": "机智",
+      "plain": "机智",
+      "icon": "✦"
+    },
+    {
+      "id": "bond",
+      "name": "羁绊",
+      "plain": "羁绊",
+      "icon": "✦"
+    }
+  ],
+  "characters": [
+    {
+      "id": "hero",
+      "name": "小暖",
+      "nameEn": "小暖",
+      "role": "hero",
+      "strength": 5,
+      "agility": 5
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene-01",
+      "chapter": "第 1 关",
+      "chapterEn": "Stage 1",
+      "title": "灰毯子小镇",
+      "titleEn": "Gray Blanket Town",
+      "description": "午睡阳光被收走了。小暖披上歪掉的红斗篷，鱼形徽章只剩一点暖光。",
+      "descriptionEn": "Naptime sun is gone. Xiaonuan's crooked red cloak and fish badge hold a tiny glow.",
+      "image": "assets/images/scenes/scene-01.png",
+      "actions": [
+        {
+          "id": "a1",
+          "name": "推开木门出发",
+          "nameEn": "Push the door open",
+          "hint": "往前一步",
+          "hintEn": "one step out",
+          "icon": "A"
+        },
+        {
+          "id": "a2",
+          "name": "轻拍邻居的门",
+          "nameEn": "Tap a neighbor",
+          "hint": "想叫醒谁",
+          "hintEn": "wake someone",
+          "icon": "B"
+        },
+        {
+          "id": "a3",
+          "name": "缩回暖暖被窝",
+          "nameEn": "Hide in the quilt",
+          "hint": "再躲一会儿",
+          "hintEn": "hide a bit",
+          "icon": "C"
+        }
+      ],
+      "outcomes": {
+        "a1": {
+          "text": "冷风灌进来，爪子却比胆子先迈出去。",
+          "textEn": "Cold wind rushes in, but paws step out first.",
+          "stateChanges": {
+            "courage": 1
+          },
+          "image": "assets/images/outcomes/scene-01-a1.png"
+        },
+        "a2": {
+          "text": "门上贴着小纸条：午睡中，请勿打扰。",
+          "textEn": "A note says: napping, do not disturb.",
+          "stateChanges": {
+            "bond": 1
+          },
+          "image": "assets/images/outcomes/scene-01-a2.png"
+        },
+        "a3": {
+          "text": "被窝很软，可黑暗还是慢慢压过来。",
+          "textEn": "The quilt is soft, but the dark still creeps in.",
+          "stateChanges": {
+            "courage": -1
+          },
+          "image": "assets/images/outcomes/scene-01-a3.png"
+        }
+      }
+    },
+    {
+      "id": "scene-02",
+      "chapter": "第 2 关",
+      "chapterEn": "Stage 2",
+      "title": "铃铛小径",
+      "titleEn": "The Bell Path",
+      "description": "落叶路上有细铃声。一只戴眼镜的麻雀打着哈欠，把铃铛推向你。",
+      "descriptionEn": "A sleepy bespectacled sparrow nudges a tiny bell toward you.",
+      "image": "assets/images/scenes/scene-02.png",
+      "actions": [
+        {
+          "id": "a1",
+          "name": "把铃铛戴上颈",
+          "nameEn": "Wear the little bell",
+          "hint": "路上更亮",
+          "hintEn": "light the way",
+          "icon": "A"
+        },
+        {
+          "id": "a2",
+          "name": "问麻雀怎么走",
+          "nameEn": "Ask the sparrow",
+          "hint": "打听路",
+          "hintEn": "ask the way",
+          "icon": "B"
+        },
+        {
+          "id": "a3",
+          "name": "悄悄绕开它走",
+          "nameEn": "Sneak around it",
+          "hint": "不想被看见",
+          "hintEn": "stay unseen",
+          "icon": "C"
+        }
+      ],
+      "outcomes": {
+        "a1": {
+          "text": "铃铛一响，脚下的路忽然清楚一点。",
+          "textEn": "One jingle, and the path looks clearer.",
+          "stateChanges": {
+            "wit": 1
+          },
+          "image": "assets/images/outcomes/scene-02-a1.png"
+        },
+        "a2": {
+          "text": "麻雀说：城堡在骨头味的风里。",
+          "textEn": "It says: follow the bone-scented wind.",
+          "stateChanges": {
+            "bond": 1
+          },
+          "image": "assets/images/outcomes/scene-02-a2.png"
+        },
+        "a3": {
+          "text": "你躲开它，小路却绕回原处。",
+          "textEn": "You dodge it, and the path loops back.",
+          "stateChanges": {
+            "courage": -1
+          },
+          "image": "assets/images/outcomes/scene-02-a3.png"
+        }
+      }
+    },
+    {
+      "id": "scene-03",
+      "chapter": "第 3 关",
+      "chapterEn": "Stage 3",
+      "title": "毛线森林",
+      "titleEn": "Yarn Forest",
+      "description": "树干缠着彩毛线。风一吹，线团骨碌碌滚向更暗的林心。",
+      "descriptionEn": "Colored yarn wraps the trees. A ball of wool rolls toward darker woods.",
+      "image": "assets/images/scenes/scene-03.png",
+      "actions": [
+        {
+          "id": "a1",
+          "name": "顺着线团前进",
+          "nameEn": "Follow the yarn ball",
+          "hint": "跟着亮线",
+          "hintEn": "follow the thread",
+          "icon": "A"
+        },
+        {
+          "id": "a2",
+          "name": "把毛线绕成桥",
+          "nameEn": "Weave a yarn bridge",
+          "hint": "自己搭路",
+          "hintEn": "build a path",
+          "icon": "B"
+        },
+        {
+          "id": "a3",
+          "name": "把线团抱紧睡",
+          "nameEn": "Hug it and nap",
+          "hint": "先休息下",
+          "hintEn": "rest first",
+          "icon": "C"
+        }
+      ],
+      "outcomes": {
+        "a1": {
+          "text": "线头牵着你，穿过打瞌睡的树。",
+          "textEn": "The yarn leads you past drowsy trees.",
+          "stateChanges": {
+            "courage": 1
+          },
+          "image": "assets/images/outcomes/scene-03-a1.png"
+        },
+        "a2": {
+          "text": "毛线桥晃了晃，成功跨过泥洼。",
+          "textEn": "The wobbly yarn bridge crosses the puddle.",
+          "stateChanges": {
+            "wit": 1
+          },
+          "image": "assets/images/outcomes/scene-03-a2.png"
+        },
+        "a3": {
+          "text": "醒来时线团不见了，只剩冷露。",
+          "textEn": "You wake: the yarn is gone, only cold dew.",
+          "stateChanges": {
+            "courage": -1
+          },
+          "image": "assets/images/outcomes/scene-03-a3.png"
+        }
+      }
+    },
+    {
+      "id": "scene-04",
+      "chapter": "第 4 关",
+      "chapterEn": "Stage 4",
+      "title": "软垫护城河",
+      "titleEn": "Cushion Moat",
+      "description": "城堡外是一圈坐垫河。狗狗卫兵的鼾声，把垫子吹得一沉一浮。",
+      "descriptionEn": "A river of cushions. Guard-dog snores make them rise and sink.",
+      "image": "assets/images/scenes/scene-04.png",
+      "actions": [
+        {
+          "id": "a1",
+          "name": "踩着垫子跳过去",
+          "nameEn": "Hop the cushions",
+          "hint": "勇敢跳",
+          "hintEn": "just jump",
+          "icon": "A"
+        },
+        {
+          "id": "a2",
+          "name": "用铃铛催他们醒",
+          "nameEn": "Ring them awake",
+          "hint": "叫醒卫兵",
+          "hintEn": "wake the guards",
+          "icon": "B"
+        },
+        {
+          "id": "a3",
+          "name": "趴着垫子漂过去",
+          "nameEn": "Float on a cushion",
+          "hint": "偷渡过河",
+          "hintEn": "drift across",
+          "icon": "C"
+        }
+      ],
+      "outcomes": {
+        "a1": {
+          "text": "垫子吱呀作响，你还是跳到对岸。",
+          "textEn": "Cushions squeak, but you land on the far bank.",
+          "stateChanges": {
+            "courage": 1
+          },
+          "image": "assets/images/outcomes/scene-04-a1.png"
+        },
+        "a2": {
+          "text": "卫兵迷糊地指了指侧门，又睡了。",
+          "textEn": "A groggy guard points to a side door, then naps.",
+          "stateChanges": {
+            "wit": 1,
+            "bond": 1
+          },
+          "image": "assets/images/outcomes/scene-04-a2.png"
+        },
+        "a3": {
+          "text": "垫子转圈，把你送回原岸边。",
+          "textEn": "The cushion spins you back to where you started.",
+          "stateChanges": {
+            "courage": -1
+          },
+          "image": "assets/images/outcomes/scene-04-a3.png"
+        }
+      }
+    },
+    {
+      "id": "scene-05",
+      "chapter": "第 5 关",
+      "chapterEn": "Stage 5",
+      "title": "骨头门铃",
+      "titleEn": "The Bone Bell",
+      "description": "侧门挂着骨头门铃。一只斑点犬揉眼睛，问你来讨什么。",
+      "descriptionEn": "A spotted hound rubs its eyes and asks what you came to claim.",
+      "image": "assets/images/scenes/scene-05.png",
+      "actions": [
+        {
+          "id": "a1",
+          "name": "大声说要阳光",
+          "nameEn": "Ask for sunshine",
+          "hint": "直接开口",
+          "hintEn": "say it plainly",
+          "icon": "A"
+        },
+        {
+          "id": "a2",
+          "name": "把徽章亮给他",
+          "nameEn": "Show the fish badge",
+          "hint": "亮出信物",
+          "hintEn": "show the token",
+          "icon": "B"
+        },
+        {
+          "id": "a3",
+          "name": "请他讲城堡事",
+          "nameEn": "Ask about the castle",
+          "hint": "先听一听",
+          "hintEn": "listen first",
+          "icon": "C"
+        }
+      ],
+      "outcomes": {
+        "a1": {
+          "text": "斑点犬一愣，侧门咯吱打开一条缝。",
+          "textEn": "The hound blinks. The side door creaks open.",
+          "stateChanges": {
+            "courage": 1
+          },
+          "image": "assets/images/outcomes/scene-05-a1.png"
+        },
+        "a2": {
+          "text": "暖光一闪，他让你摸摸脑袋再进。",
+          "textEn": "A warm flash. He lets you pat his head and enter.",
+          "stateChanges": {
+            "wit": 1,
+            "bond": 1
+          },
+          "image": "assets/images/outcomes/scene-05-a2.png"
+        },
+        "a3": {
+          "text": "他说魔王也怕晒，把光藏进罐子。",
+          "textEn": "He says the king fears sunburn, so the light was jarred.",
+          "stateChanges": {
+            "bond": 1
+          },
+          "image": "assets/images/outcomes/scene-05-a3.png"
+        }
+      }
+    },
+    {
+      "id": "scene-06",
+      "chapter": "第 6 关",
+      "chapterEn": "Stage 6",
+      "title": "打鼾大厅",
+      "titleEn": "Hall of Snores",
+      "description": "大厅堆满骨头靠枕。尽头罐子里有金黄的光，一跳一跳。",
+      "descriptionEn": "Bone pillows everywhere. A jar of gold light pulses at the far end.",
+      "image": "assets/images/scenes/scene-06.png",
+      "actions": [
+        {
+          "id": "a1",
+          "name": "径直走向罐子",
+          "nameEn": "Walk to the jar",
+          "hint": "笔直走",
+          "hintEn": "go straight",
+          "icon": "A"
+        },
+        {
+          "id": "a2",
+          "name": "用毛线套住盖子",
+          "nameEn": "Lasso the lid",
+          "hint": "巧取罐盖",
+          "hintEn": "trick the lid",
+          "icon": "B"
+        },
+        {
+          "id": "a3",
+          "name": "先给靠枕让让路",
+          "nameEn": "Tidy the pillows",
+          "hint": "礼貌让路",
+          "hintEn": "make a path",
+          "icon": "C"
+        }
+      ],
+      "outcomes": {
+        "a1": {
+          "text": "地板吱嘎响，你还是走到光面前。",
+          "textEn": "The floor creaks, yet you reach the light.",
+          "stateChanges": {
+            "courage": 1
+          },
+          "image": "assets/images/outcomes/scene-06-a1.png"
+        },
+        "a2": {
+          "text": "线套轻轻一拉，盖子松了半圈。",
+          "textEn": "A gentle tug, and the lid loosens a half turn.",
+          "stateChanges": {
+            "wit": 1
+          },
+          "image": "assets/images/outcomes/scene-06-a2.png"
+        },
+        "a3": {
+          "text": "靠枕高兴地让出一条软路。",
+          "textEn": "The pillows happily open a soft aisle.",
+          "stateChanges": {
+            "bond": 1
+          },
+          "image": "assets/images/outcomes/scene-06-a3.png"
+        }
+      }
+    },
+    {
+      "id": "scene-07",
+      "chapter": "第 7 关",
+      "chapterEn": "Stage 7",
+      "title": "发抖的魔王",
+      "titleEn": "The Shivering King",
+      "description": "王座上是圆滚滚的短腿犬。他抱紧罐子，耳朵却在发抖。",
+      "descriptionEn": "A round short-legged dog hugs the jar. His ears are trembling.",
+      "image": "assets/images/scenes/scene-07.png",
+      "actions": [
+        {
+          "id": "a1",
+          "name": "上前讨回阳光",
+          "nameEn": "Claim the sunshine",
+          "hint": "讨回阳光",
+          "hintEn": "ask it back",
+          "icon": "A"
+        },
+        {
+          "id": "a2",
+          "name": "把铃铛摇给他",
+          "nameEn": "Shake the bell",
+          "hint": "安抚魔王",
+          "hintEn": "soothe the king",
+          "icon": "B"
+        },
+        {
+          "id": "a3",
+          "name": "坐下来听他说",
+          "nameEn": "Sit and listen",
+          "hint": "听完心事",
+          "hintEn": "hear him out",
+          "icon": "C"
+        }
+      ],
+      "outcomes": {
+        "a1": {
+          "text": "你的斗篷歪了，声音却没有抖。",
+          "textEn": "Your cloak is crooked, but your voice is steady.",
+          "stateChanges": {
+            "courage": 2
+          },
+          "image": "assets/images/outcomes/scene-07-a1.png"
+        },
+        "a2": {
+          "text": "铃声让他放松，爪子松开一点。",
+          "textEn": "The bell eases him. His paws loosen a little.",
+          "stateChanges": {
+            "wit": 1,
+            "bond": 1
+          },
+          "image": "assets/images/outcomes/scene-07-a2.png"
+        },
+        "a3": {
+          "text": "他说阳光太刺，藏起来大家就能睡。",
+          "textEn": "He says the sun stings, so hiding it lets all nap.",
+          "stateChanges": {
+            "bond": 2
+          },
+          "image": "assets/images/outcomes/scene-07-a3.png"
+        }
+      }
+    },
+    {
+      "id": "scene-08",
+      "chapter": "第 8 关",
+      "chapterEn": "Stage 8",
+      "title": "骨头罐子",
+      "titleEn": "The Bone Jar",
+      "description": "罐子里是一整座午后。小暖的徽章发烫，魔王的鼻子亮晶晶。",
+      "descriptionEn": "A whole afternoon sits in the jar. Badge warm, king's nose shining.",
+      "image": "assets/images/scenes/scene-08.png",
+      "actions": [
+        {
+          "id": "a1",
+          "name": "推倒罐子放光",
+          "nameEn": "Tip the jar over",
+          "hint": "把光放走",
+          "hintEn": "set light free",
+          "icon": "A"
+        },
+        {
+          "id": "a2",
+          "name": "提议轮流午睡",
+          "nameEn": "Suggest nap shifts",
+          "hint": "一起分享",
+          "hintEn": "share the sun",
+          "icon": "B"
+        },
+        {
+          "id": "a3",
+          "name": "只求一小勺光",
+          "nameEn": "Ask a spoonful",
+          "hint": "只要一点",
+          "hintEn": "just a little",
+          "icon": "C"
+        }
+      ],
+      "outcomes": {
+        "a1": {
+          "text": "金光涌出来，像温牛奶漫过地板。",
+          "textEn": "Gold light spills like warm milk across the floor.",
+          "stateChanges": {
+            "courage": 1
+          },
+          "image": "assets/images/outcomes/scene-08-a1.png"
+        },
+        "a2": {
+          "text": "两人用爪子在盖上画了轮班表。",
+          "textEn": "Two paws sketch a shift chart on the lid.",
+          "stateChanges": {
+            "wit": 1,
+            "bond": 1
+          },
+          "image": "assets/images/outcomes/scene-08-a2.png"
+        },
+        "a3": {
+          "text": "他挖一勺光给你，自己留下阴影。",
+          "textEn": "He scoops you a spoon of light, keeping the shade.",
+          "stateChanges": {
+            "bond": 1
+          },
+          "image": "assets/images/outcomes/scene-08-a3.png"
+        }
+      }
+    }
+  ],
+  "endings": [
+    {
+      "id": "ending-hero",
+      "title": "一爪讨回阳光",
+      "titleEn": "Sunshine, One Paw at a Time",
+      "description": "小暖把罐子轻轻推倒。阳光像温牛奶漫过小镇，狗狗魔王打了个金黄的喷嚏。怕黑的橘猫站在亮处，斗篷还是歪的。",
+      "descriptionEn": "Xiaonuan tips the jar. Warm light floods the town. The dog king sneezes gold. The timid cat stands in the sun, cloak still crooked.",
+      "all": [
+        {
+          "state": "courage",
+          "operator": ">=",
+          "value": 8
+        }
+      ],
+      "image": "assets/images/endings/ending-hero.png"
+    },
+    {
+      "id": "ending-friends",
+      "title": "轮班午睡盟约",
+      "titleEn": "The Nap-Shift Pact",
+      "description": "小暖听完他怕晒的心事。阳光分成两份，一份铺小镇，一份盖狗狗的鼻子。他们约好，铃铛响就换班。",
+      "descriptionEn": "Xiaonuan hears his fear of sunburn. Light is split: one share for town, one for a sleepy nose. The bell will call the shift change.",
+      "all": [
+        {
+          "state": "bond",
+          "operator": ">=",
+          "value": 6
+        }
+      ],
+      "image": "assets/images/endings/ending-friends.png"
+    },
+    {
+      "id": "ending-ordinary",
+      "title": "一勺午后",
+      "titleEn": "A Spoonful of Afternoon",
+      "description": "小暖只带回一勺午后。徽章暖着回家的路，邻居的窗台亮了一小块。城堡仍在打鼾，可黑暗已经不那么满了。",
+      "descriptionEn": "Only a spoon of afternoon comes home. The badge warms the road; a windowsill glows. The castle still snores, but the dark is less full.",
+      "all": [],
+      "image": "assets/images/endings/ending-ordinary.png"
+    }
+  ],
+  "keepsakes": [],
+  "catalog": {
+    "eyebrow": "新的异境微光已经苏醒",
+    "cardDescription": "怕黑的橘猫为了夺回被藏起的午睡阳光，走向狗狗魔王的城堡。没有利爪见血，只有软垫、铃铛，和一颗想把小镇叫醒的心。",
+    "cardIcon": "✦",
+    "cardGradient": [
+      "#f4a261",
+      "#f6e7c1",
+      "#6b8cae"
+    ],
+    "cardAccent": "#6b8cae",
+    "actionSummary": "勇气 · 机智 · 羁绊",
+    "actionSummaryEn": "Courage · Wit · Bond"
+  },
+  "ui": {
+    "backToCatalog": "← 返回目录",
+    "backToCatalogEn": "← Worlds",
+    "introButton": "开始冒险",
+    "introButtonEn": "Begin the adventure",
+    "continueButton": "继续",
+    "continueButtonEn": "Continue",
+    "finalContinueButton": "看看结局",
+    "finalContinueButtonEn": "See the ending",
+    "replayButton": "再冒险一次",
+    "replayButtonEn": "Adventure again",
+    "hideBackToCatalog": true
+  }
+}
